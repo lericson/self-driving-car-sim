@@ -3722,9 +3722,37 @@ Prefab:
       propertyPath: m_LocalEulerAnglesHint.y
       value: 90
       objectReference: {fileID: 0}
+    - target: {fileID: 11400020, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
+      propertyPath: m_SpeedType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400020, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
+      propertyPath: m_Topspeed
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 5400000, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
+      propertyPath: m_IsKinematic
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 20000011327949428, guid: 0fb4610dba67fc24cb2a6674fb155fc1,
+        type: 2}
+      propertyPath: field of view
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011211598448, guid: 0fb4610dba67fc24cb2a6674fb155fc1,
+        type: 2}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114772414695313206, guid: 0fb4610dba67fc24cb2a6674fb155fc1,
+        type: 2}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 114000013168730212, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
     - {fileID: 114000011847512630, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
+    - {fileID: 114772414695313206, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
   m_IsPrefabParent: 0
 --- !u!4 &1067024515 stripped

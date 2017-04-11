@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using System;
 
 public class MenuOptions : MonoBehaviour
 {
@@ -15,6 +16,11 @@ public class MenuOptions : MonoBehaviour
 		if (outlines.Length > 0) 
 		{
 			outlines [0].effectColor = new Color (0, 0, 0);
+		}
+
+		string level = Environment.GetEnvironmentVariable("LEVEL") ?? "";
+		if (level.Length > 0) {
+			SceneManager.LoadScene(level);
 		}
     }
 

@@ -42,7 +42,8 @@ namespace SocketIO
 	{
 		#region Public Properties
 
-		public string url = "ws://127.0.0.1:4567/socket.io/?EIO=4&transport=websocket";
+		public string defaultNetloc = "127.0.0.1:4567";
+		public string url = "ws://{0}/socket.io/?EIO=4&transport=websocket";
 		public bool autoConnect = true;
 		public int reconnectDelay = 5;
 		public float ackExpirationTime = 1800f;
@@ -99,7 +100,9 @@ namespace SocketIO
 			sid = null;
 			packetId = 0;
 
-			ws = new WebSocket(url);
+			string netloc = Environment.GetEnvironmentVariable("WS_NETLOC") ?? defaultNetloc;
+			ws = new WebSocket(String.Format(url, netloc));
+
 			ws.OnOpen += OnOpen;
 			ws.OnMessage += OnMessage;
 			ws.OnError += OnError;

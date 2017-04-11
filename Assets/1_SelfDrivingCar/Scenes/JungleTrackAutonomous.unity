@@ -4267,6 +4267,11 @@ Prefab:
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 114000011874370104, guid: 1f347eea738f54024b45de3f0811b76a,
+        type: 2}
+      propertyPath: url
+      value: ws://{0}/socket.io/?EIO=4&transport=websocket
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 1f347eea738f54024b45de3f0811b76a, type: 2}
   m_IsPrefabParent: 0
@@ -6466,6 +6471,14 @@ Prefab:
     - target: {fileID: 4000014282207764, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400002, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
+      propertyPath: m_SpeedType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400002, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
+      propertyPath: m_Topspeed
+      value: 200
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections;
 using SocketIO;
 using UnityStandardAssets.Vehicles.Car;
+using UnityEngine.SceneManagement;
 using System;
 using System.Security.AccessControl;
 
@@ -19,8 +20,9 @@ public class CommandServer : MonoBehaviour
 		_socket = GameObject.Find("SocketIO").GetComponent<SocketIOComponent>();
 		_socket.On("open", OnOpen);
 		_socket.On("steer", OnSteer);
-		_socket.On("manual", onManual);
+		_socket.On("reset_level", OnResetLevel);
 		_carController = CarRemoteControl.GetComponent<CarController>();
+		StartCoroutine(EmitTelemetry());
 	}
 
 	// Update is called once per frame
@@ -31,13 +33,6 @@ public class CommandServer : MonoBehaviour
 	void OnOpen(SocketIOEvent obj)
 	{
 		Debug.Log("Connection Open");
-		EmitTelemetry(obj);
-	}
-
-	// 
-	void onManual(SocketIOEvent obj)
-	{
-		EmitTelemetry (obj);
 	}
 
 	void OnSteer(SocketIOEvent obj)
@@ -46,49 +41,34 @@ public class CommandServer : MonoBehaviour
 		//    print(float.Parse(jsonObject.GetField("steering_angle").str));
 		CarRemoteControl.SteeringAngle = float.Parse(jsonObject.GetField("steering_angle").str);
 		CarRemoteControl.Acceleration = float.Parse(jsonObject.GetField("throttle").str);
-		EmitTelemetry(obj);
 	}
 
-	void EmitTelemetry(SocketIOEvent obj)
+	void OnResetLevel(SocketIOEvent obj)
 	{
-		UnityMainThreadDispatcher.Instance().Enqueue(() =>
-		{
-			print("Attempting to Send...");
-			// send only if it's not being manually driven
-			if ((Input.GetKey(KeyCode.W)) || (Input.GetKey(KeyCode.S))) {
-				_socket.Emit("telemetry", new JSONObject());
-			}
-			else {
-				// Collect Data from the Car
-				Dictionary<string, string> data = new Dictionary<string, string>();
-				data["steering_angle"] = _carController.CurrentSteerAngle.ToString("N4");
-				data["throttle"] = _carController.AccelInput.ToString("N4");
-				data["speed"] = _carController.CurrentSpeed.ToString("N4");
-				data["image"] = Convert.ToBase64String(CameraHelper.CaptureFrame(FrontFacingCamera));
-				_socket.Emit("telemetry", new JSONObject(data));
-			}
-		});
+		string sceneName = SceneManager.GetActiveScene ().name;
+		Debug.Log ($"resetting level {sceneName}");
+		SceneManager.LoadScene (sceneName);
+	}
 
-		//    UnityMainThreadDispatcher.Instance().Enqueue(() =>
-		//    {
-		//      	
-		//      
-		//
-		//		// send only if it's not being manually driven
-		//		if ((Input.GetKey(KeyCode.W)) || (Input.GetKey(KeyCode.S))) {
-		//			_socket.Emit("telemetry", new JSONObject());
-		//		}
-		//		else {
-		//			// Collect Data from the Car
-		//			Dictionary<string, string> data = new Dictionary<string, string>();
-		//			data["steering_angle"] = _carController.CurrentSteerAngle.ToString("N4");
-		//			data["throttle"] = _carController.AccelInput.ToString("N4");
-		//			data["speed"] = _carController.CurrentSpeed.ToString("N4");
-		//			data["image"] = Convert.ToBase64String(CameraHelper.CaptureFrame(FrontFacingCamera));
-		//			_socket.Emit("telemetry", new JSONObject(data));
-		//		}
-		//      
-		////      
-		//    });
+	IEnumerator EmitTelemetry()
+	{
+		yield return new WaitForSeconds(0.0666666666666667f);
+
+		// send only if it's not being manually driven
+		if ((Input.GetKey(KeyCode.W)) || (Input.GetKey(KeyCode.S))) {
+			_socket.Emit("telemetry", new JSONObject());
+		}
+		else {
+			// Collect Data from the 
+			Dictionary<string, string> data = new Dictionary<string, string>();
+			data["steering_angle"] = _carController.CurrentSteerAngle.ToString("N4");
+			data["throttle"] = _carController.AccelInput.ToString("N4");
+			data["speed"] = _carController.CurrentSpeed.ToString("N4");
+			data["num_wheels_on_road"] = _carController.NumWheelsOnRoad.ToString("N4");
+			data["image"] = Convert.ToBase64String(CameraHelper.CaptureFrame(FrontFacingCamera));
+			_socket.Emit("telemetry", new JSONObject(data));
+		}
+
+		StartCoroutine(EmitTelemetry());
 	}
 }

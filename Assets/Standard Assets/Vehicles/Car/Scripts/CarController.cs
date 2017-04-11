@@ -59,6 +59,7 @@ namespace UnityStandardAssets.Vehicles.Car
         private float m_GearFactor;
         private float m_OldRotation;
         private float m_CurrentTorque;
+		private float m_NumWheelsOnRoad;
         private Rigidbody m_Rigidbody;
         private const float k_ReversingThreshold = 0.01f;
         private string m_saveLocation = "";
@@ -125,9 +126,11 @@ namespace UnityStandardAssets.Vehicles.Car
             set { m_SteerAngle = value; }
         }
 
-        public float CurrentSpeed{ get { return m_Rigidbody.velocity.magnitude * 2.23693629f; } }
+        public float CurrentSpeed{ get { return m_Rigidbody.velocity.magnitude * 3.6f; } }
 
-        public float MaxSpeed{ get { return m_Topspeed; } }
+		public float MaxSpeed{ get { return m_Topspeed; } }
+
+		public float NumWheelsOnRoad{ get { return m_NumWheelsOnRoad; } }
 
         public float Revs { get; private set; }
 
@@ -187,7 +190,6 @@ namespace UnityStandardAssets.Vehicles.Car
             m_GearFactor = Mathf.Lerp (m_GearFactor, targetGearFactor, Time.deltaTime * 5f);
         }
 
-
         private void CalculateRevs ()
         {
             // calculate engine revs (for display / sound)
@@ -209,15 +211,26 @@ namespace UnityStandardAssets.Vehicles.Car
 
         public void Move (float steering, float accel, float footbrake, float handbrake)
         {
-            for (int i = 0; i < 4; i++) {
+			int wheelsInAir = 0, wheelsOnTrack = 0;
+			for (int i = 0; i < 4; i++) {
                 Quaternion quat;
                 Vector3 position;
                 m_WheelColliders [i].GetWorldPose (out position, out quat);
+				WheelHit h;
+				if (m_WheelColliders [i].GetGroundHit (out h)) {
+					if (h.collider.CompareTag ("Road")) {
+						wheelsOnTrack++;
+					}
+				} else {
+					wheelsInAir++;
+				}
                 m_WheelMeshes [i].transform.position = position;
                 m_WheelMeshes [i].transform.rotation = quat;
             }
+			// Wheels on road includes wheels in air unless some are neither.
+			m_NumWheelsOnRoad = (wheelsOnTrack + wheelsInAir == 4 && wheelsOnTrack > 0) ? 4 : wheelsOnTrack;
 
-            //clamp input values
+			//clamp input values
             steering = Mathf.Clamp (steering, -1, 1);
             AccelInput = accel = Mathf.Clamp (accel, 0, 1);
             BrakeInput = footbrake = -1 * Mathf.Clamp (footbrake, -1, 0);
@@ -228,8 +241,6 @@ namespace UnityStandardAssets.Vehicles.Car
             m_SteerAngle = steering * m_MaximumSteerAngle;
             m_WheelColliders [0].steerAngle = m_SteerAngle;
             m_WheelColliders [1].steerAngle = m_SteerAngle;
-
-
 
             SteerHelper ();
             ApplyDrive (accel, footbrake);
@@ -463,8 +474,8 @@ namespace UnityStandardAssets.Vehicles.Car
             // Start the Coroutine to Capture Data Every Second.
             // Persist that Information to a CSV and Perist the Camera Frame
             yield return new WaitForSeconds(0.0666666666666667f);
-
-            if (m_saveLocation != "")
+   
+			if (m_saveLocation != "")
             {
                 CarSample sample = new CarSample();
 
