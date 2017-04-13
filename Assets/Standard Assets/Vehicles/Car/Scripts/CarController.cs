@@ -4,6 +4,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using UnityStandardAssets.Utility;
 
 
 
@@ -18,8 +19,8 @@ namespace UnityStandardAssets.Vehicles.Car
 
     internal enum SpeedType
     {
-        MPH,
-        KPH
+        KPH,
+        MPH
     }
 
     public class CarController : MonoBehaviour
@@ -52,6 +53,20 @@ namespace UnityStandardAssets.Vehicles.Car
         [SerializeField] private Camera LeftCamera;
         [SerializeField] private Camera RightCamera;
 
+        //------------------------- EDDETING HERE ---------------------------------------
+        public WaypointCircuit RoadWaypointCircuit;
+        private CatmulRomSpline spline = new CatmulRomSpline();
+        //------------------------- EDDETING HERE ---------------------------------------
+
+
+        #region visulisation fields
+
+        public bool Visualize;
+        private GameObject closestPointMarker;
+        private GameObject closestWaypointMarker;
+        private GameObject nextWaypointMarker;
+        #endregion
+
         private Quaternion[] m_WheelMeshLocalRotations;
         private Vector3 m_Prevpos, m_Pos;
         private float m_SteerAngle;
@@ -68,6 +83,7 @@ namespace UnityStandardAssets.Vehicles.Car
 		private bool isSaving;
 		private Vector3 saved_position;
 		private Quaternion saved_rotation;
+
 
         public bool Skidding { get; private set; }
 
@@ -149,6 +165,28 @@ namespace UnityStandardAssets.Vehicles.Car
 
             m_Rigidbody = GetComponent<Rigidbody> ();
             m_CurrentTorque = m_FullTorqueOverAllWheels - (m_TractionControl * m_FullTorqueOverAllWheels);
+
+            //Set size of next waypoint marker
+            if (Visualize)
+            {
+                closestPointMarker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                closestPointMarker.transform.localScale = new Vector3(1f, 1f, 1f);
+                closestPointMarker.GetComponent<Renderer>().material.color = Color.red;
+                closestPointMarker.GetComponent<Collider>().enabled = false;
+
+
+                nextWaypointMarker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                nextWaypointMarker.transform.localScale = new Vector3(1.5f,1.5f,1.5f);
+                nextWaypointMarker.GetComponent<Renderer>().material.color = Color.green;
+                nextWaypointMarker.GetComponent<Collider>().enabled = false;
+
+                closestWaypointMarker = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                closestWaypointMarker.transform.localScale = new Vector3(1f, 1f, 1f);
+                closestWaypointMarker.GetComponent<Renderer>().material.color = Color.blue;
+                closestWaypointMarker.GetComponent<Collider>().enabled = false;
+
+            }
+
         }
 
         private void GearChanging ()
@@ -200,13 +238,30 @@ namespace UnityStandardAssets.Vehicles.Car
             var revsRangeMax = ULerp (m_RevRangeBoundary, 1f, gearNumFactor);
             Revs = ULerp (revsRangeMin, revsRangeMax, m_GearFactor);
         }
-
+        
         public void Update()
         {
+            //Save pos
+            m_Pos = transform.position;
+
             if (IsRecording)
             {
                 //Dump();
             }
+            // Debug.Log(m_Pos);
+            //Vector3 closestPoint = RoadWaypointCircuit.ClosestPointOnPath(m_Pos,rotVec);
+            if (Visualize)
+            {
+                CatmulRomSpline new_spline = RoadWaypointCircuit.GetCurrentSpline(m_Pos);
+                if (new_spline != spline){
+                    spline.visualised = false;
+                    spline = new_spline;
+                    spline.visualised = true;
+                }
+                Debug.Log(string.Format("spline = {0}",spline));
+                closestPointMarker.transform.position = new_spline.GetClosestPointOnSpline(m_Pos);
+            }
+            m_Prevpos = m_Pos;
         }
 
         public void Move (float steering, float accel, float footbrake, float handbrake)
@@ -486,7 +541,6 @@ namespace UnityStandardAssets.Vehicles.Car
                 sample.speed = CurrentSpeed;
                 sample.position = transform.position;
                 sample.rotation = transform.rotation;
-
                 carSamples.Enqueue(sample);
 
                 sample = null;
@@ -535,6 +589,7 @@ namespace UnityStandardAssets.Vehicles.Car
         public float brake;
         public float speed;
         public string timeStamp;
+        public float velInRoadDirection;
     }
 
 }
