@@ -260,6 +260,12 @@ namespace UnityStandardAssets.Vehicles.Car
                 }
                 Debug.Log(string.Format("spline = {0}",spline));
                 closestPointMarker.transform.position = new_spline.GetClosestPointOnSpline(m_Pos);
+
+                Vector3 roadHeadding;
+                Vector3 closestPointOnSpline = spline.GetClosestPointOnSpline(transform.position, out roadHeadding);
+                Vector3 carSpeed = transform.rotation * Vector3.forward * CurrentSpeed;
+                Vector3 speedOnRoad = Vector3.Project(carSpeed, roadHeadding);
+                Debug.DrawRay(closestPointOnSpline, speedOnRoad, Color.red,1);
             }
             m_Prevpos = m_Pos;
         }
@@ -532,17 +538,23 @@ namespace UnityStandardAssets.Vehicles.Car
    
 			if (m_saveLocation != "")
             {
-                CarSample sample = new CarSample();
+                Vector3 roadHeadding;
+                Vector3 closestPointOnSpline = spline.GetClosestPointOnSpline(transform.position, out roadHeadding);
+                Vector3 carSpeed = transform.rotation * Vector3.forward * CurrentSpeed;
+                Vector3 speedInRoadDir = Vector3.Project(carSpeed, roadHeadding);
 
-                sample.timeStamp = System.DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
-                sample.steeringAngle = m_SteerAngle / m_MaximumSteerAngle;
-                sample.throttle = AccelInput;
-                sample.brake = BrakeInput;
-                sample.speed = CurrentSpeed;
-                sample.position = transform.position;
-                sample.rotation = transform.rotation;
-                carSamples.Enqueue(sample);
-
+                var sample = new CarSample
+                {
+                    timeStamp = System.DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff"),
+                    steeringAngle = m_SteerAngle / m_MaximumSteerAngle,
+                    throttle = AccelInput,
+                    brake = BrakeInput,
+                    speed = CurrentSpeed,
+                    position = transform.position,
+                    rotation = transform.rotation,
+                    velInRoadDirection = speedInRoadDir.magnitude,
+                    distanceFromMiddleOfRoad = Vector3.Distance(transform.position,closestPointOnSpline),
+                };
                 sample = null;
                 //may or may not be needed
             }
@@ -590,6 +602,7 @@ namespace UnityStandardAssets.Vehicles.Car
         public float speed;
         public string timeStamp;
         public float velInRoadDirection;
+        public float distanceFromMiddleOfRoad;
     }
 
 }
