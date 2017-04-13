@@ -46,7 +46,7 @@ public class CommandServer : MonoBehaviour
 	void OnResetLevel(SocketIOEvent obj)
 	{
 		string sceneName = SceneManager.GetActiveScene ().name;
-		Debug.Log ($"resetting level {sceneName}");
+		Debug.Log ( string.Format("resetting level {0}",sceneName));
 		SceneManager.LoadScene (sceneName);
 	}
 
@@ -59,13 +59,17 @@ public class CommandServer : MonoBehaviour
 			_socket.Emit("telemetry", new JSONObject());
 		}
 		else {
-			// Collect Data from the 
+            // Collect Data from the 
+            float distaneToMiddle, speedInRoadHeadding;
+            _carController.getRelativeToRoadCenter(out distaneToMiddle, out speedInRoadHeadding);
 			Dictionary<string, string> data = new Dictionary<string, string>();
 			data["steering_angle"] = _carController.CurrentSteerAngle.ToString("N4");
 			data["throttle"] = _carController.AccelInput.ToString("N4");
 			data["speed"] = _carController.CurrentSpeed.ToString("N4");
 			data["num_wheels_on_road"] = _carController.NumWheelsOnRoad.ToString("N4");
 			data["image"] = Convert.ToBase64String(CameraHelper.CaptureFrame(FrontFacingCamera));
+            data["distance_to_middle"] = distaneToMiddle.ToString("N4");
+            data["speed_in_road_headding"] = speedInRoadHeadding.ToString("N4");
 			_socket.Emit("telemetry", new JSONObject(data));
 		}
 

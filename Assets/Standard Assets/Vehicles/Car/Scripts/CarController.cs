@@ -55,7 +55,7 @@ namespace UnityStandardAssets.Vehicles.Car
 
         //------------------------- EDDETING HERE ---------------------------------------
         public WaypointCircuit RoadWaypointCircuit;
-        private CatmulRomSpline spline = new CatmulRomSpline();
+        public CatmulRomSpline spline = new CatmulRomSpline();
         //------------------------- EDDETING HERE ---------------------------------------
 
 
@@ -63,8 +63,6 @@ namespace UnityStandardAssets.Vehicles.Car
 
         public bool Visualize;
         private GameObject closestPointMarker;
-        private GameObject closestWaypointMarker;
-        private GameObject nextWaypointMarker;
         #endregion
 
         private Quaternion[] m_WheelMeshLocalRotations;
@@ -173,18 +171,6 @@ namespace UnityStandardAssets.Vehicles.Car
                 closestPointMarker.transform.localScale = new Vector3(1f, 1f, 1f);
                 closestPointMarker.GetComponent<Renderer>().material.color = Color.red;
                 closestPointMarker.GetComponent<Collider>().enabled = false;
-
-
-                nextWaypointMarker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                nextWaypointMarker.transform.localScale = new Vector3(1.5f,1.5f,1.5f);
-                nextWaypointMarker.GetComponent<Renderer>().material.color = Color.green;
-                nextWaypointMarker.GetComponent<Collider>().enabled = false;
-
-                closestWaypointMarker = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                closestWaypointMarker.transform.localScale = new Vector3(1f, 1f, 1f);
-                closestWaypointMarker.GetComponent<Renderer>().material.color = Color.blue;
-                closestWaypointMarker.GetComponent<Collider>().enabled = false;
-
             }
 
         }
@@ -237,6 +223,17 @@ namespace UnityStandardAssets.Vehicles.Car
             var revsRangeMin = ULerp (0f, m_RevRangeBoundary, CurveFactor (gearNumFactor));
             var revsRangeMax = ULerp (m_RevRangeBoundary, 1f, gearNumFactor);
             Revs = ULerp (revsRangeMin, revsRangeMax, m_GearFactor);
+        }
+
+        public void getRelativeToRoadCenter(out float distanceToClosest,out float speedInRoadHeadding)
+        {
+            spline = RoadWaypointCircuit.GetCurrentSpline(transform.position);
+            Vector3 roadHeadding;
+            Vector3 closestPointOnSpline = spline.GetClosestPointOnSpline(transform.position, out roadHeadding);
+            Vector3 carSpeed = transform.rotation * Vector3.forward * CurrentSpeed;
+            Vector3 velInRoadHeadding = Vector3.Project(carSpeed, roadHeadding);
+            speedInRoadHeadding = velInRoadHeadding.magnitude;
+            distanceToClosest = Vector3.Distance(closestPointOnSpline, transform.position);
         }
         
         public void Update()
