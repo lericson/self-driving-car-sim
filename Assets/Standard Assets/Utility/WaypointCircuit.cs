@@ -122,31 +122,48 @@ namespace UnityStandardAssets.Utility
                     (-p0 + 3 * p1 - 3 * p2 + p3) * i * i * i);
         }
 
-        public CatmulRomSpline GetCurrentSpline(Vector3 pos)
+        public IEnumerable<CatmulRomSpline> GetCurrentSplines(Vector3 pos)
         {
             int closestI = GetClosestWaypointIndex(pos);
             Vector3 closestWaypoint = points[closestI];
 
             Vector3 nextWaypoint = points[(closestI + 1 + numPoints) % numPoints];
             Vector3 previousWaypoint = points[(closestI - 1 + numPoints) % numPoints];
+            
             //TODO: Use planes intead of point projections
             Vector3 closestOnLineAhead = Math3d.ProjectPointOnLineSegment(nextWaypoint, closestWaypoint, pos);
             Vector3 closestOnLineBehind = Math3d.ProjectPointOnLineSegment(closestWaypoint, previousWaypoint, pos);
+
             int p0Idx, p1Idx, p2Idx, p3Idx;
-            if (Vector3.Distance(closestOnLineAhead,pos) < Vector3.Distance(closestOnLineBehind,pos))
+            int p0Idx_, p1Idx_, p2Idx_, p3Idx_;
+
+            bool closerToLineBehind = Vector3.Distance(closestOnLineAhead, pos) < Vector3.Distance(closestOnLineBehind, pos);
+
+            if (closerToLineBehind)
             {
-                p0Idx = (closestI - 1 + numPoints) % numPoints;
+                p0Idx_ = (closestI - 1 + numPoints) % numPoints;
+                p0Idx = (p0Idx_ - 1 + numPoints) % numPoints;
             }
             else
             {
                 p0Idx = (closestI - 2 + numPoints) % numPoints;
+                p0Idx_ = (p0Idx + 1 + numPoints) % numPoints;
             }
             p1Idx = (p0Idx + 1 + numPoints) % numPoints;
             p2Idx = (p0Idx + 2 + numPoints) % numPoints;
             p3Idx = (p0Idx + 3 + numPoints) % numPoints;
-            Debug.Log(string.Format("p0Idx = {0}, p1Idx = {1}, p2Idx = {2}, p3Idx = {3}, numPoints = {4}, closestI = {5}",
-                p0Idx,p1Idx,p2Idx,p3Idx,numPoints,closestI));
-            return new CatmulRomSpline(points[p0Idx],points[p1Idx],points[p2Idx],points[p3Idx]);
+
+            //Debug.Log(string.Format("p0Idx = {0}, p1Idx = {1}, p2Idx = {2}, p3Idx = {3}, numPoints = {4}, closestI = {5}",
+            //    p0Idx,p1Idx,p2Idx,p3Idx,numPoints,closestI));
+
+            p1Idx_ = (p0Idx_ + 1 + numPoints) % numPoints;
+            p2Idx_ = (p0Idx_ + 2 + numPoints) % numPoints;
+            p3Idx_ = (p0Idx_ + 3 + numPoints) % numPoints;
+
+            return new List<CatmulRomSpline> {
+                new CatmulRomSpline(points[p0Idx], points[p1Idx], points[p2Idx], points[p3Idx]),
+                new CatmulRomSpline(points[p0Idx_], points[p1Idx_], points[p2Idx_], points[p3Idx_])
+            };
         }
 
         public int GetClosestWaypointIndex(Vector3 pos)
@@ -320,7 +337,7 @@ namespace UnityStandardAssets.Utility
             }
         }
 
-        public CatmulRomSpline() : this(new Vector3(0,0,0), new Vector3(0,0,1),new Vector3(0,0,2),new Vector3(0, 0, 3))
+        public CatmulRomSpline() : this(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero)
         {}
 
         public CatmulRomSpline(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
@@ -336,14 +353,40 @@ namespace UnityStandardAssets.Utility
             Vector3 _;
             return GetClosestPointOnSpline(pos, out _);
         }
-        public Vector3 GetClosestPointOnSpline(Vector3 pos,out Vector3 headding)
+
+        public static Vector3 GetClosestPointOnSeveralSplines(IEnumerable<CatmulRomSpline> splines,Vector3 pos, out Vector3 roadHeadding)
         {
-            float smallestDistance = float.MaxValue;
+            float closestDist = float.MaxValue;
+            Vector3 closestPoint = Vector3.zero;
+            roadHeadding = Vector3.zero;
+            foreach (CatmulRomSpline spline in splines)
+            {
+                float dist;
+                Vector3 roadHeaddingCand;
+                Vector3 closestPointCand = spline.GetClosestPointOnSpline(pos, out roadHeaddingCand, out dist);
+                if(dist < closestDist)
+                {
+                    closestDist = dist;
+                    roadHeadding = roadHeaddingCand;
+                    closestPoint = closestPointCand;
+                }
+            }
+            return closestPoint;
+        }
+
+        public Vector3 GetClosestPointOnSpline(Vector3 pos, out Vector3 roadHeadding)
+        {
+            float _;
+            return GetClosestPointOnSpline(pos, out roadHeadding,out _);
+        }
+        public Vector3 GetClosestPointOnSpline(Vector3 pos,out Vector3 roadHeadding,out float smallestDistance)
+        {
+            smallestDistance = float.MaxValue;
             float tAtSmallestDistance = 0;
             Vector3 x_t = getPointAtT(0);
             Vector3 x_t_ = x_t;
             Vector3 closestPoint = x_t;
-            const int n = 1000;
+            const int n = 100;
             for (int i = 1; i <= n; i++)
             {
                 float t = ((float)i) / n;
@@ -358,8 +401,8 @@ namespace UnityStandardAssets.Utility
                 }
                 x_t_ = x_t;
             }
-            headding = Vector3.Normalize(getPointAtT(tAtSmallestDistance + 1e-5f) - closestPoint);
-            Debug.DrawRay(closestPoint, headding * 100, Color.blue, 1);
+            roadHeadding = Vector3.Normalize(getPointAtT(tAtSmallestDistance + 1e-5f) - closestPoint);
+            //Debug.DrawRay(closestPoint, roadHeadding * 100, Color.blue, 1);
             return closestPoint;
         }
 

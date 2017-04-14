@@ -55,7 +55,7 @@ namespace UnityStandardAssets.Vehicles.Car
 
         //------------------------- EDDETING HERE ---------------------------------------
         public WaypointCircuit RoadWaypointCircuit;
-        public CatmulRomSpline spline = new CatmulRomSpline();
+        public IEnumerable<CatmulRomSpline> splines = new List<CatmulRomSpline>();
         //------------------------- EDDETING HERE ---------------------------------------
 
 
@@ -225,21 +225,37 @@ namespace UnityStandardAssets.Vehicles.Car
             Revs = ULerp (revsRangeMin, revsRangeMax, m_GearFactor);
         }
 
-        public void getRelativeToRoadCenter(out float distanceToClosest,out float speedInRoadHeadding)
+        public void getRelativeToRoadCenter(out float middleRoadDist, out float speedInRoadHeadding)
         {
-            spline = RoadWaypointCircuit.GetCurrentSpline(transform.position);
+            Vector3 _, __;
+            getRelativeToRoadCenter(out middleRoadDist,out speedInRoadHeadding,out _,out __);
+        }
+
+        public void getRelativeToRoadCenter(out Vector3 velInRoadHeadding, out Vector3 closestPointOnSpline)
+        {
+            float _, __;
+            getRelativeToRoadCenter(out _, out __,out velInRoadHeadding, out closestPointOnSpline);
+        }
+
+        public void getRelativeToRoadCenter(
+            out float middleRoadDist,
+            out float speedInRoadHeadding,
+            out Vector3 velInRoadHeadding,
+            out Vector3 closestPointOnSpline)
+        {
             Vector3 roadHeadding;
-            Vector3 closestPointOnSpline = spline.GetClosestPointOnSpline(transform.position, out roadHeadding);
+            splines = RoadWaypointCircuit.GetCurrentSplines(transform.position);
+            closestPointOnSpline =
+                CatmulRomSpline.GetClosestPointOnSeveralSplines(splines, transform.position, out roadHeadding);
             Vector3 carSpeed = transform.rotation * Vector3.forward * CurrentSpeed;
-            Vector3 velInRoadHeadding = Vector3.Project(carSpeed, roadHeadding);
+            velInRoadHeadding = Vector3.Project(carSpeed, roadHeadding);
             speedInRoadHeadding = velInRoadHeadding.magnitude;
-            distanceToClosest = Vector3.Distance(closestPointOnSpline, transform.position);
+            middleRoadDist = Vector3.Distance(closestPointOnSpline, transform.position);
         }
         
         public void Update()
         {
             //Save pos
-            m_Pos = transform.position;
 
             if (IsRecording)
             {
@@ -249,22 +265,15 @@ namespace UnityStandardAssets.Vehicles.Car
             //Vector3 closestPoint = RoadWaypointCircuit.ClosestPointOnPath(m_Pos,rotVec);
             if (Visualize)
             {
-                CatmulRomSpline new_spline = RoadWaypointCircuit.GetCurrentSpline(m_Pos);
-                if (new_spline != spline){
-                    spline.visualised = false;
-                    spline = new_spline;
-                    spline.visualised = true;
-                }
-                Debug.Log(string.Format("spline = {0}",spline));
-                closestPointMarker.transform.position = new_spline.GetClosestPointOnSpline(m_Pos);
+                Vector3 velInRoadHeadding, closestPointOnSpline;
+                float middleRoadDist, speedInRoadHeadding;
+                getRelativeToRoadCenter(out middleRoadDist, out speedInRoadHeadding, out velInRoadHeadding, out closestPointOnSpline);
+                closestPointMarker.transform.position = closestPointOnSpline;
+                Debug.Log(string.Format("||velInRoadHeadding|| = {0}, ||closestPointOnSpline|| = {1}",
+                    speedInRoadHeadding, middleRoadDist));
 
-                Vector3 roadHeadding;
-                Vector3 closestPointOnSpline = spline.GetClosestPointOnSpline(transform.position, out roadHeadding);
-                Vector3 carSpeed = transform.rotation * Vector3.forward * CurrentSpeed;
-                Vector3 speedOnRoad = Vector3.Project(carSpeed, roadHeadding);
-                Debug.DrawRay(closestPointOnSpline, speedOnRoad, Color.red,1);
+                
             }
-            m_Prevpos = m_Pos;
         }
 
         public void Move (float steering, float accel, float footbrake, float handbrake)
@@ -535,10 +544,9 @@ namespace UnityStandardAssets.Vehicles.Car
    
 			if (m_saveLocation != "")
             {
-                Vector3 roadHeadding;
-                Vector3 closestPointOnSpline = spline.GetClosestPointOnSpline(transform.position, out roadHeadding);
-                Vector3 carSpeed = transform.rotation * Vector3.forward * CurrentSpeed;
-                Vector3 speedInRoadDir = Vector3.Project(carSpeed, roadHeadding);
+                float velRoadDir;
+                float middleRoadDist;
+                getRelativeToRoadCenter(out middleRoadDist,out velRoadDir);
 
                 var sample = new CarSample
                 {
@@ -549,8 +557,8 @@ namespace UnityStandardAssets.Vehicles.Car
                     speed = CurrentSpeed,
                     position = transform.position,
                     rotation = transform.rotation,
-                    velInRoadDirection = speedInRoadDir.magnitude,
-                    distanceFromMiddleOfRoad = Vector3.Distance(transform.position,closestPointOnSpline),
+                    velInRoadDirection = velRoadDir,
+                    distanceFromMiddleOfRoad = middleRoadDist,
                 };
                 sample = null;
                 //may or may not be needed
