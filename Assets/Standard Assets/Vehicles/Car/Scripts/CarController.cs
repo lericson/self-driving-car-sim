@@ -4,6 +4,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using UnityStandardAssets.Utility;
 
 
 
@@ -18,8 +19,8 @@ namespace UnityStandardAssets.Vehicles.Car
 
     internal enum SpeedType
     {
-        MPH,
-        KPH
+        KPH,
+        MPH
     }
 
     public class CarController : MonoBehaviour
@@ -52,6 +53,18 @@ namespace UnityStandardAssets.Vehicles.Car
         [SerializeField] private Camera LeftCamera;
         [SerializeField] private Camera RightCamera;
 
+        //------------------------- EDDETING HERE ---------------------------------------
+        public WaypointCircuit RoadWaypointCircuit;
+        public IEnumerable<CatmulRomSpline> splines = new List<CatmulRomSpline>();
+        //------------------------- EDDETING HERE ---------------------------------------
+
+
+        #region visulisation fields
+
+        public bool Visualize;
+        private GameObject closestPointMarker;
+        #endregion
+
         private Quaternion[] m_WheelMeshLocalRotations;
         private Vector3 m_Prevpos, m_Pos;
         private float m_SteerAngle;
@@ -68,6 +81,7 @@ namespace UnityStandardAssets.Vehicles.Car
 		private bool isSaving;
 		private Vector3 saved_position;
 		private Quaternion saved_rotation;
+
 
         public bool Skidding { get; private set; }
 
@@ -149,6 +163,16 @@ namespace UnityStandardAssets.Vehicles.Car
 
             m_Rigidbody = GetComponent<Rigidbody> ();
             m_CurrentTorque = m_FullTorqueOverAllWheels - (m_TractionControl * m_FullTorqueOverAllWheels);
+
+            //Set size of next waypoint marker
+            if (Visualize)
+            {
+                closestPointMarker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                closestPointMarker.transform.localScale = new Vector3(1f, 1f, 1f);
+                closestPointMarker.GetComponent<Renderer>().material.color = Color.red;
+                closestPointMarker.GetComponent<Collider>().enabled = false;
+            }
+
         }
 
         private void GearChanging ()
@@ -201,11 +225,54 @@ namespace UnityStandardAssets.Vehicles.Car
             Revs = ULerp (revsRangeMin, revsRangeMax, m_GearFactor);
         }
 
+        public void getRelativeToRoadCenter(out float middleRoadDist, out float speedInRoadHeadding)
+        {
+            Vector3 _, __;
+            getRelativeToRoadCenter(out middleRoadDist,out speedInRoadHeadding,out _,out __);
+        }
+
+        public void getRelativeToRoadCenter(out Vector3 velInRoadHeadding, out Vector3 closestPointOnSpline)
+        {
+            float _, __;
+            getRelativeToRoadCenter(out _, out __,out velInRoadHeadding, out closestPointOnSpline);
+        }
+
+        public void getRelativeToRoadCenter(
+            out float middleRoadDist,
+            out float speedInRoadHeadding,
+            out Vector3 velInRoadHeadding,
+            out Vector3 closestPointOnSpline)
+        {
+            Vector3 roadHeadding;
+            splines = RoadWaypointCircuit.GetCurrentSplines(transform.position);
+            closestPointOnSpline =
+                CatmulRomSpline.GetClosestPointOnSeveralSplines(splines, transform.position, out roadHeadding);
+            Vector3 carSpeed = transform.rotation * Vector3.forward * CurrentSpeed;
+            velInRoadHeadding = Vector3.Project(carSpeed, roadHeadding);
+            speedInRoadHeadding = velInRoadHeadding.magnitude;
+            middleRoadDist = Vector3.Distance(closestPointOnSpline, transform.position);
+        }
+        
         public void Update()
         {
+            //Save pos
+
             if (IsRecording)
             {
                 //Dump();
+            }
+            // Debug.Log(m_Pos);
+            //Vector3 closestPoint = RoadWaypointCircuit.ClosestPointOnPath(m_Pos,rotVec);
+            if (Visualize)
+            {
+                Vector3 velInRoadHeadding, closestPointOnSpline;
+                float middleRoadDist, speedInRoadHeadding;
+                getRelativeToRoadCenter(out middleRoadDist, out speedInRoadHeadding, out velInRoadHeadding, out closestPointOnSpline);
+                closestPointMarker.transform.position = closestPointOnSpline;
+                Debug.Log(string.Format("||velInRoadHeadding|| = {0}, ||closestPointOnSpline|| = {1}",
+                    speedInRoadHeadding, middleRoadDist));
+
+                
             }
         }
 
@@ -477,18 +544,22 @@ namespace UnityStandardAssets.Vehicles.Car
    
 			if (m_saveLocation != "")
             {
-                CarSample sample = new CarSample();
+                float velRoadDir;
+                float middleRoadDist;
+                getRelativeToRoadCenter(out middleRoadDist,out velRoadDir);
 
-                sample.timeStamp = System.DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
-                sample.steeringAngle = m_SteerAngle / m_MaximumSteerAngle;
-                sample.throttle = AccelInput;
-                sample.brake = BrakeInput;
-                sample.speed = CurrentSpeed;
-                sample.position = transform.position;
-                sample.rotation = transform.rotation;
-
-                carSamples.Enqueue(sample);
-
+                var sample = new CarSample
+                {
+                    timeStamp = System.DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff"),
+                    steeringAngle = m_SteerAngle / m_MaximumSteerAngle,
+                    throttle = AccelInput,
+                    brake = BrakeInput,
+                    speed = CurrentSpeed,
+                    position = transform.position,
+                    rotation = transform.rotation,
+                    velInRoadDirection = velRoadDir,
+                    distanceFromMiddleOfRoad = middleRoadDist,
+                };
                 sample = null;
                 //may or may not be needed
             }
@@ -535,6 +606,8 @@ namespace UnityStandardAssets.Vehicles.Car
         public float brake;
         public float speed;
         public string timeStamp;
+        public float velInRoadDirection;
+        public float distanceFromMiddleOfRoad;
     }
 
 }

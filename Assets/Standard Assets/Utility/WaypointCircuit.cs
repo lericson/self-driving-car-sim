@@ -1,9 +1,10 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using System.Collections.Generic;
+using UnityStandardAssets  ;
 #if UNITY_EDITOR
 using UnityEditor;
-
 #endif
 
 namespace UnityStandardAssets.Utility
@@ -13,7 +14,7 @@ namespace UnityStandardAssets.Utility
         public WaypointList waypointList = new WaypointList();
         [SerializeField] private bool smoothRoute = true;
         private int numPoints;
-        private Vector3[] points;
+        public Vector3[] points;
         private float[] distances;
 
         public float editorVisualisationSubsteps = 100;
@@ -65,7 +66,6 @@ namespace UnityStandardAssets.Utility
             {
                 Length = distances[distances.Length - 1];
             }
-
             dist = Mathf.Repeat(dist, Length);
 
             while (distances[point] < dist)
@@ -79,7 +79,6 @@ namespace UnityStandardAssets.Utility
             p2n = point;
 
             // found point numbers, now find interpolation value between the two middle points
-
             i = Mathf.InverseLerp(distances[p1n], distances[p2n], dist);
 
             if (smoothRoute)
@@ -114,16 +113,77 @@ namespace UnityStandardAssets.Utility
                 return Vector3.Lerp(points[p1n], points[p2n], i);
             }
         }
-
-
         private Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float i)
         {
             // comments are no use here... it's the catmull-rom equation.
             // Un-magic this, lord vector!
-            return 0.5f*
-                   ((2*p1) + (-p0 + p2)*i + (2*p0 - 5*p1 + 4*p2 - p3)*i*i +
-                    (-p0 + 3*p1 - 3*p2 + p3)*i*i*i);
+            return 0.5f *
+                   ((2 * p1) + (-p0 + p2) * i + (2 * p0 - 5 * p1 + 4 * p2 - p3) * i * i +
+                    (-p0 + 3 * p1 - 3 * p2 + p3) * i * i * i);
         }
+
+        public IEnumerable<CatmulRomSpline> GetCurrentSplines(Vector3 pos)
+        {
+            int closestI = GetClosestWaypointIndex(pos);
+            Vector3 closestWaypoint = points[closestI];
+
+            Vector3 nextWaypoint = points[(closestI + 1 + numPoints) % numPoints];
+            Vector3 previousWaypoint = points[(closestI - 1 + numPoints) % numPoints];
+            
+            //TODO: Use planes intead of point projections
+            Vector3 closestOnLineAhead = Math3d.ProjectPointOnLineSegment(nextWaypoint, closestWaypoint, pos);
+            Vector3 closestOnLineBehind = Math3d.ProjectPointOnLineSegment(closestWaypoint, previousWaypoint, pos);
+
+            int p0Idx, p1Idx, p2Idx, p3Idx;
+            int p0Idx_, p1Idx_, p2Idx_, p3Idx_;
+
+            bool closerToLineBehind = Vector3.Distance(closestOnLineAhead, pos) < Vector3.Distance(closestOnLineBehind, pos);
+
+            if (closerToLineBehind)
+            {
+                p0Idx_ = (closestI - 1 + numPoints) % numPoints;
+                p0Idx = (p0Idx_ - 1 + numPoints) % numPoints;
+            }
+            else
+            {
+                p0Idx = (closestI - 2 + numPoints) % numPoints;
+                p0Idx_ = (p0Idx + 1 + numPoints) % numPoints;
+            }
+            p1Idx = (p0Idx + 1 + numPoints) % numPoints;
+            p2Idx = (p0Idx + 2 + numPoints) % numPoints;
+            p3Idx = (p0Idx + 3 + numPoints) % numPoints;
+
+            //Debug.Log(string.Format("p0Idx = {0}, p1Idx = {1}, p2Idx = {2}, p3Idx = {3}, numPoints = {4}, closestI = {5}",
+            //    p0Idx,p1Idx,p2Idx,p3Idx,numPoints,closestI));
+
+            p1Idx_ = (p0Idx_ + 1 + numPoints) % numPoints;
+            p2Idx_ = (p0Idx_ + 2 + numPoints) % numPoints;
+            p3Idx_ = (p0Idx_ + 3 + numPoints) % numPoints;
+
+            return new List<CatmulRomSpline> {
+                new CatmulRomSpline(points[p0Idx], points[p1Idx], points[p2Idx], points[p3Idx]),
+                new CatmulRomSpline(points[p0Idx_], points[p1Idx_], points[p2Idx_], points[p3Idx_])
+            };
+        }
+
+        public int GetClosestWaypointIndex(Vector3 pos)
+        {
+            int closestI = -1;
+            float closest = float.MaxValue;
+            for (int i = 0; i < points.Length; i++)
+            {
+                float dist = Vector3.Distance(pos, points[i]);
+                if (dist < closest)
+                {
+                    closest = dist;
+                    closestI = i;
+                }
+            }
+            return closestI;
+        }
+
+
+
 
 
         private void CachePositionsAndDistances()
@@ -215,6 +275,164 @@ namespace UnityStandardAssets.Utility
                 this.position = position;
                 this.direction = direction;
             }
+        }
+    }
+
+    public class CatmulRomSpline
+    {
+        public Vector3 p0 { get; private set; }
+        public Vector3 p1 { get; private set; }
+        public Vector3 p2 { get; private set; }
+        public Vector3 p3 { get; private set; }
+
+        private GameObject p0Marker;
+        private GameObject p1Marker;
+        private GameObject p2Marker;
+        private GameObject p3Marker;
+
+        private bool m_visualised = false;
+        public bool visualised {
+            get
+            {
+                return m_visualised;
+            }
+            set
+            {
+                if(value == m_visualised)
+                {
+                    return;
+                }
+                m_visualised = value;
+                if (m_visualised)
+                {
+
+                    p0Marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    p0Marker.transform.localScale = new Vector3(1f, 1f, 1f);
+                    p0Marker.transform.position = p0;
+                    p0Marker.GetComponent<Collider>().enabled = false;
+
+                    p1Marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    p1Marker.transform.localScale = new Vector3(1f, 1f, 1f);
+                    p1Marker.transform.position = p1;
+                    p1Marker.GetComponent<Collider>().enabled = false;
+
+                    p2Marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    p2Marker.transform.localScale = new Vector3(1f, 1f, 1f);
+                    p2Marker.transform.position = p2;
+                    p2Marker.GetComponent<Collider>().enabled = false;
+
+                    p3Marker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    p3Marker.transform.localScale = new Vector3(1f, 1f, 1f);
+                    p3Marker.transform.position = p3;
+                    p3Marker.GetComponent<Collider>().enabled = false;
+                }
+                else
+                {
+                    GameObject.Destroy(p0Marker);
+                    GameObject.Destroy(p1Marker);
+                    GameObject.Destroy(p2Marker);
+                    GameObject.Destroy(p3Marker);
+                }
+
+            }
+        }
+
+        public CatmulRomSpline() : this(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero)
+        {}
+
+        public CatmulRomSpline(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            this.p0 = p0;
+            this.p1 = p1;
+            this.p2 = p2;
+            this.p3 = p3;
+        }
+
+        public Vector3 GetClosestPointOnSpline(Vector3 pos)
+        {
+            Vector3 _;
+            return GetClosestPointOnSpline(pos, out _);
+        }
+
+        public static Vector3 GetClosestPointOnSeveralSplines(IEnumerable<CatmulRomSpline> splines,Vector3 pos, out Vector3 roadHeadding)
+        {
+            float closestDist = float.MaxValue;
+            Vector3 closestPoint = Vector3.zero;
+            roadHeadding = Vector3.zero;
+            foreach (CatmulRomSpline spline in splines)
+            {
+                float dist;
+                Vector3 roadHeaddingCand;
+                Vector3 closestPointCand = spline.GetClosestPointOnSpline(pos, out roadHeaddingCand, out dist);
+                if(dist < closestDist)
+                {
+                    closestDist = dist;
+                    roadHeadding = roadHeaddingCand;
+                    closestPoint = closestPointCand;
+                }
+            }
+            return closestPoint;
+        }
+
+        public Vector3 GetClosestPointOnSpline(Vector3 pos, out Vector3 roadHeadding)
+        {
+            float _;
+            return GetClosestPointOnSpline(pos, out roadHeadding,out _);
+        }
+        public Vector3 GetClosestPointOnSpline(Vector3 pos,out Vector3 roadHeadding,out float smallestDistance)
+        {
+            smallestDistance = float.MaxValue;
+            float tAtSmallestDistance = 0;
+            Vector3 x_t = getPointAtT(0);
+            Vector3 x_t_ = x_t;
+            Vector3 closestPoint = x_t;
+            const int n = 100;
+            for (int i = 1; i <= n; i++)
+            {
+                float t = ((float)i) / n;
+                x_t = getPointAtT(t);
+                Vector3 closestPointCandidate = Math3d.ProjectPointOnLineSegment(x_t, x_t_, pos);
+                float dist = Vector3.Distance(closestPointCandidate, pos);
+                if (dist < smallestDistance)
+                {
+                    smallestDistance = dist;
+                    closestPoint = closestPointCandidate;
+                    tAtSmallestDistance = t;
+                }
+                x_t_ = x_t;
+            }
+            roadHeadding = Vector3.Normalize(getPointAtT(tAtSmallestDistance + 1e-5f) - closestPoint);
+            //Debug.DrawRay(closestPoint, roadHeadding * 100, Color.blue, 1);
+            return closestPoint;
+        }
+
+        public Vector3 getPointAtT(float t)
+        {
+            // comments are no use here... it's the catmull-rom equation.
+            // Un-magic this, lord vector!
+            return 0.5f *
+                   ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t +
+                    (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!typeof(CatmulRomSpline).IsInstanceOfType(obj))
+            {
+                return false;
+            }
+
+            CatmulRomSpline other = obj as CatmulRomSpline;
+            if(other.p0 == p0 && other.p1 == p1 && other.p2 == p2 && other.p3 == p3)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("p0={0}, p1={1}, p2={2}, p3={3}",p0,p1,p2,p3);
         }
     }
 }
@@ -380,5 +598,7 @@ namespace UnityStandardAssets.Utility.Inspector
             }
         }
     }
+
+
 #endif
 }
