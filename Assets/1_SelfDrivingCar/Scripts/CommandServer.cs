@@ -48,6 +48,7 @@ public class CommandServer : MonoBehaviour
 		string sceneName = SceneManager.GetActiveScene ().name;
 		Debug.Log ($"resetting level {sceneName}");
 		SceneManager.LoadScene (sceneName);
+		_socket.Close ();
 	}
 
 	IEnumerator EmitTelemetry()
