@@ -48,6 +48,7 @@ public class CommandServer : MonoBehaviour
 		string sceneName = SceneManager.GetActiveScene ().name;
 		Debug.Log ( string.Format("resetting level {0}",sceneName));
 		SceneManager.LoadScene (sceneName);
+		_socket.Close ();
 	}
 
 	IEnumerator EmitTelemetry()
@@ -60,8 +61,8 @@ public class CommandServer : MonoBehaviour
 		}
 		else {
             // Collect Data from the 
-            float distaneToMiddle, speedInRoadHeadding;
-            _carController.getRelativeToRoadCenter(out distaneToMiddle, out speedInRoadHeadding);
+            float distaneToMiddle, speedInRoadHeading;
+            _carController.getRelativeToRoadCenter(out distaneToMiddle, out speedInRoadHeading);
 			Dictionary<string, string> data = new Dictionary<string, string>();
 			data["steering_angle"] = _carController.CurrentSteerAngle.ToString("N4");
 			data["throttle"] = _carController.AccelInput.ToString("N4");
@@ -69,7 +70,7 @@ public class CommandServer : MonoBehaviour
 			data["num_wheels_on_road"] = _carController.NumWheelsOnRoad.ToString("N4");
 			data["image"] = Convert.ToBase64String(CameraHelper.CaptureFrame(FrontFacingCamera));
             data["distance_to_middle"] = distaneToMiddle.ToString("N4");
-            data["speed_in_road_headding"] = speedInRoadHeadding.ToString("N4");
+            data["speed_in_road_heading"] = speedInRoadHeading.ToString("N4");
 			_socket.Emit("telemetry", new JSONObject(data));
 		}
 
