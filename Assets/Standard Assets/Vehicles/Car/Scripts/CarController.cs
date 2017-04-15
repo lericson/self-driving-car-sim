@@ -140,7 +140,7 @@ namespace UnityStandardAssets.Vehicles.Car
             set { m_SteerAngle = value; }
         }
 
-        public float CurrentSpeed{ get { return m_Rigidbody.velocity.magnitude * 3.6f; } }
+		public float CurrentSpeed{ get { return Vector3.Dot (m_Rigidbody.velocity, m_Rigidbody.transform.forward) * 3.6f; } }
 
 		public float MaxSpeed{ get { return m_Topspeed; } }
 
