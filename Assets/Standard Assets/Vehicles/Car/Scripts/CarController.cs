@@ -174,6 +174,12 @@ namespace UnityStandardAssets.Vehicles.Car
                 closestPointMarker.GetComponent<Collider>().enabled = false;
             }
 
+            if (RoadWaypointCircuit != null)
+            {
+                RoadWaypointCircuit.putAtRandomPoint(transform);
+
+            }
+
         }
 
         private void GearChanging ()

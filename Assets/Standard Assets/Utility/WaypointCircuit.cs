@@ -16,6 +16,7 @@ namespace UnityStandardAssets.Utility
         private int numPoints;
         public Vector3[] points;
         private float[] distances;
+        private System.Random rnd = new System.Random(DateTime.Now.Millisecond + DateTime.Now.Second);
 
         public float editorVisualisationSubsteps = 100;
         public float Length { get; private set; }
@@ -182,6 +183,26 @@ namespace UnityStandardAssets.Utility
             return closestI;
         }
 
+        public void putAtRandomPoint(Transform pos)
+        {
+            int p0Idx = rnd.Next(numPoints);
+            Debug.Log(string.Format("p0Idx = {0}", p0Idx));
+            Debug.Log(string.Format("numPoints = {0}", numPoints));
+            int p1Idx = (p0Idx + 1 + numPoints) % numPoints;
+            int p2Idx = (p0Idx + 2 + numPoints) % numPoints;
+            int p3Idx = (p0Idx + 3 + numPoints) % numPoints;
+            var spline = new CatmulRomSpline(points[p0Idx], points[p1Idx], points[p2Idx],points[p3Idx]);
+            float t = (float)rnd.NextDouble();
+            Debug.Log(string.Format("t = {0}",t));
+            Vector3 x = spline.getPointAtT(t);
+            Vector3 x_ = spline.getPointAtT(t + 1e-2f);
+            Vector3 newHeadding= Vector3.Normalize(x_ - x);
+            Vector3 initialHeadding = pos.rotation * Vector3.forward;
+            Debug.Log(string.Format("newHeadding = {0}",newHeadding));
+            //pos.rotation.SetFromToRotation(newHeadding, initialHeadding);
+            pos.position = x;
+            pos.rotation = Quaternion.LookRotation(newHeadding);
+        }
 
 
 
@@ -386,7 +407,7 @@ namespace UnityStandardAssets.Utility
             Vector3 x_t = getPointAtT(0);
             Vector3 x_t_ = x_t;
             Vector3 closestPoint = x_t;
-            const int n = 100;
+            const int n = 10;
             for (int i = 1; i <= n; i++)
             {
                 float t = ((float)i) / n;
