@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityStandardAssets.Vehicles.Car;
 
 namespace UnityStandardAssets.Utility
 {
@@ -62,7 +63,7 @@ namespace UnityStandardAssets.Utility
             {
                 target = new GameObject(name + " Waypoint Target").transform;
             }
-
+            GetComponent<CarAIControl>().SetTarget(target);
             Reset();
         }
 
