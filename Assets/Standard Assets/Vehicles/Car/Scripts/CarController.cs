@@ -116,7 +116,6 @@ namespace UnityStandardAssets.Vehicles.Car
 					TotalSamples = carSamples.Count;
 					isSaving = true;
 					StartCoroutine(WriteSamplesToDisk());
-
                 };
             }
 
@@ -182,6 +181,7 @@ namespace UnityStandardAssets.Vehicles.Car
             }
             if (AutoRecord)
             {
+				OpenFolder (SaveLocation);
                 IsRecording = true;
             }
 
@@ -491,7 +491,6 @@ namespace UnityStandardAssets.Vehicles.Car
                 }
             }
         }
-
 
 		//Changed the WriteSamplesToDisk to a IEnumerator method that plays back recording along with percent status from UISystem script 
 		//instead of showing frozen screen until all data is recorded
