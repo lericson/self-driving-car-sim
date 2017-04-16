@@ -1559,24 +1559,13 @@ Prefab:
     - target: {fileID: 114000011211598448, guid: 0fb4610dba67fc24cb2a6674fb155fc1,
         type: 2}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 11400020, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
-<<<<<<< HEAD
       propertyPath: RoadWaypointCircuit
       value: 
       objectReference: {fileID: 1932927585}
     - target: {fileID: 114000012124030144, guid: 0fb4610dba67fc24cb2a6674fb155fc1,
-=======
-      propertyPath: Visualize
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11400020, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
-      propertyPath: RoadWaypointCircuit
-      value: 
-      objectReference: {fileID: 1932927585}
-    - target: {fileID: 124000013054762068, guid: 0fb4610dba67fc24cb2a6674fb155fc1,
->>>>>>> 8af8575190931344ae82e1a12738f9516f5ebdd3
         type: 2}
       propertyPath: m_Enabled
       value: 0
