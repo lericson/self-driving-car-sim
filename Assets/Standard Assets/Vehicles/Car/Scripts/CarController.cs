@@ -275,11 +275,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 Vector3 velInRoadHeading, closestPointOnSpline;
                 float middleRoadDist, speedInRoadHeading;
                 getRelativeToRoadCenter(out middleRoadDist, out speedInRoadHeading, out velInRoadHeading, out closestPointOnSpline);
-                closestPointMarker.transform.position = closestPointOnSpline;
-                Debug.Log(string.Format("||velInRoadHeading|| = {0}, ||closestPointOnSpline|| = {1}",
-                    speedInRoadHeading, middleRoadDist));
-
-                
+                closestPointMarker.transform.position = closestPointOnSpline;                
             }
         }
 
@@ -567,6 +563,7 @@ namespace UnityStandardAssets.Vehicles.Car
                     velInRoadDirection = velRoadDir,
                     distanceFromMiddleOfRoad = middleRoadDist,
                 };
+				carSamples.Enqueue (sample);
                 sample = null;
                 //may or may not be needed
             }
