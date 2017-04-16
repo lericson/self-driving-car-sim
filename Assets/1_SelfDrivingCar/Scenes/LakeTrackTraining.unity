@@ -972,7 +972,7 @@ MonoBehaviour:
   m_Target: {fileID: 0}
   m_StopWhenTargetReached: 0
   m_ReachTargetThreshold: 2
-  m_MaxSpeed: 68
+  m_MaxSpeed: 120
 --- !u!114 &179243201
 MonoBehaviour:
   m_ObjectHideFlags: 0
