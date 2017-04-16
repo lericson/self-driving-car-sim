@@ -1003,12 +1003,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   circuit: {fileID: 1932927585}
   lookAheadForTargetOffset: 5
-  lookAheadForTargetFactor: 0.5
+  lookAheadForTargetFactor: 0.35
   lookAheadForSpeedOffset: 10
   lookAheadForSpeedFactor: 0.5
   progressStyle: 0
   pointToPointThreshold: 4
-  target: {fileID: 1768258571}
+  target: {fileID: 781949556}
 --- !u!1 &192738146
 GameObject:
   m_ObjectHideFlags: 0
@@ -1569,6 +1569,18 @@ Prefab:
         type: 2}
       propertyPath: m_Enabled
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400020, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
+      propertyPath: AutoRecord
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400020, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
+      propertyPath: SaveInterval
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400020, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
+      propertyPath: SaveLocation
+      value: E:\
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 114000013168730212, guid: 0fb4610dba67fc24cb2a6674fb155fc1, type: 2}
@@ -11084,6 +11096,36 @@ MonoBehaviour:
   - {x: 156.80827, y: 2.9029226, z: 60.27102}
   - {x: 176.10828, y: 2.9029226, z: 79.57102}
   - {x: 179.30827, y: 2.9029226, z: 98.67102}
+  distances:
+  - 0
+  - 20.248457
+  - 50.502213
+  - 72.649445
+  - 93.8053
+  - 114.655716
+  - 136.47704
+  - 162.08992
+  - 194.1157
+  - 222.87434
+  - 262.4655
+  - 307.13138
+  - 370.2093
+  - 432.90463
+  - 483.73517
+  - 532.692
+  - 567.9539
+  - 608.4544
+  - 676.5614
+  - 764.18005
+  - 826.514
+  - 856.92255
+  - 896.9475
+  - 960.0794
+  - 985.7068
+  - 1008.9566
+  - 1084.8661
+  - 1112.1604
+  - 1131.5266
   editorVisualisationSubsteps: 100
 --- !u!4 &1932927586
 Transform:

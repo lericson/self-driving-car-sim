@@ -53,11 +53,11 @@ namespace UnityStandardAssets.Vehicles.Car
         [SerializeField] private Camera LeftCamera;
         [SerializeField] private Camera RightCamera;
 
-        //------------------------- EDDETING HERE ---------------------------------------
+        public bool AutoRecord = false;
+        public int SaveInterval = 1000;
         public WaypointCircuit RoadWaypointCircuit;
         public IEnumerable<CatmulRomSpline> splines = new List<CatmulRomSpline>();
-        //------------------------- EDDETING HERE ---------------------------------------
-
+        public bool RandomStartPos = false;
 
         #region visulisation fields
 
@@ -75,7 +75,8 @@ namespace UnityStandardAssets.Vehicles.Car
 		private float m_NumWheelsOnRoad;
         private Rigidbody m_Rigidbody;
         private const float k_ReversingThreshold = 0.01f;
-        private string m_saveLocation = "";
+        public string SaveLocation = "";
+
         private Queue<CarSample> carSamples;
 		private int TotalSamples;
 		private bool isSaving;
@@ -124,7 +125,7 @@ namespace UnityStandardAssets.Vehicles.Car
 
 		public bool checkSaveLocation()
 		{
-			if (m_saveLocation != "") 
+			if (SaveLocation != "") 
 			{
 				return true;
 			}
@@ -174,10 +175,14 @@ namespace UnityStandardAssets.Vehicles.Car
                 closestPointMarker.GetComponent<Collider>().enabled = false;
             }
 
-            if (RoadWaypointCircuit != null)
+            if (RoadWaypointCircuit != null && RandomStartPos)
             {
                 RoadWaypointCircuit.putAtRandomPoint(transform);
 
+            }
+            if (AutoRecord)
+            {
+                IsRecording = true;
             }
 
         }
@@ -511,7 +516,7 @@ namespace UnityStandardAssets.Vehicles.Car
 				string rightPath = WriteImage (RightCamera, "right", sample.timeStamp);
 
 				string row = string.Format ("{0},{1},{2},{3},{4},{5},{6}\n", centerPath, leftPath, rightPath, sample.steeringAngle, sample.throttle, sample.brake, sample.speed);
-				File.AppendAllText (Path.Combine (m_saveLocation, CSVFileName), row);
+				File.AppendAllText (Path.Combine (SaveLocation, CSVFileName), row);
 			}
 			if (carSamples.Count > 0) {
 				//request if there are more samples to pull
@@ -528,7 +533,10 @@ namespace UnityStandardAssets.Vehicles.Car
 				transform.rotation = saved_rotation;
 				m_Rigidbody.velocity = new Vector3(0f,-10f,0f);
 				Move(0f, 0f, 0f, 0f);
-
+                if (AutoRecord)
+                {
+                    IsRecording = true;
+                }
 			}
 		}
 
@@ -549,7 +557,7 @@ namespace UnityStandardAssets.Vehicles.Car
             // Persist that Information to a CSV and Perist the Camera Frame
             yield return new WaitForSeconds(0.0666666666666667f);
    
-			if (m_saveLocation != "")
+			if (SaveLocation != "")
             {
                 float velRoadDir;
                 float middleRoadDist;
@@ -567,22 +575,34 @@ namespace UnityStandardAssets.Vehicles.Car
                     velInRoadDirection = velRoadDir,
                     distanceFromMiddleOfRoad = middleRoadDist,
                 };
-                sample = null;
-                //may or may not be needed
-            }
+                carSamples.Enqueue(sample);
 
+
+
+            }
             // Only reschedule if the button hasn't toggled
-            if (IsRecording)
+            if (IsRecording && !AutoRecord)
             {
                 StartCoroutine(Sample());
+            }
+            else if (AutoRecord)
+            {
+                if(carSamples.Count >= SaveInterval)
+                {
+                    IsRecording = false;
+                }
+                else
+                {
+                    StartCoroutine(Sample());
+                }
             }
 				
         }
 
         private void OpenFolder(string location)
         {
-            m_saveLocation = location;
-            Directory.CreateDirectory (Path.Combine(m_saveLocation, DirFrames));
+            SaveLocation = location;
+            Directory.CreateDirectory (Path.Combine(SaveLocation, DirFrames));
         }
 
         private string WriteImage (Camera camera, string prepend, string timestamp)
@@ -596,7 +616,7 @@ namespace UnityStandardAssets.Vehicles.Car
             texture2D.Apply ();
             byte[] image = texture2D.EncodeToJPG ();
             UnityEngine.Object.DestroyImmediate (texture2D);
-            string directory = Path.Combine(m_saveLocation, DirFrames);
+            string directory = Path.Combine(SaveLocation, DirFrames);
             string path = Path.Combine(directory, prepend + "_" + timestamp + ".jpg");
             File.WriteAllBytes (path, image);
             image = null;

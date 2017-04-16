@@ -15,7 +15,7 @@ namespace UnityStandardAssets.Utility
         [SerializeField] private bool smoothRoute = true;
         private int numPoints;
         public Vector3[] points;
-        private float[] distances;
+        public float[] distances;
         private System.Random rnd = new System.Random(DateTime.Now.Millisecond + DateTime.Now.Second);
 
         public float editorVisualisationSubsteps = 100;
