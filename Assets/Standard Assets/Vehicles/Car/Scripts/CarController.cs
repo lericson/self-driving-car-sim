@@ -573,7 +573,7 @@ namespace UnityStandardAssets.Vehicles.Car
             {
                 StartCoroutine(Sample());
             }
-				
+
         }
 
         private void OpenFolder(string location)
