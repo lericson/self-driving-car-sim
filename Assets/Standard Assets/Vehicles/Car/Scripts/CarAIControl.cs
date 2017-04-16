@@ -56,6 +56,8 @@ namespace UnityStandardAssets.Vehicles.Car
         // should we stop driving when we reach the target?
         [SerializeField] private float m_ReachTargetThreshold = 2;
         // proximity to target to consider we 'reached' it, and stop driving.
+		[SerializeField] [Range(0, 500)] private float m_MaxSpeed = 0.0f;
+		// maximum speed to drive at, use car's top seed if zero.
 
         private float m_RandomPerlin;
         // A random value for the car to base its wander on (so that AI cars don't all wander in the same pattern)
@@ -74,6 +76,10 @@ namespace UnityStandardAssets.Vehicles.Car
         {
             // get the car controller reference
             m_CarController = GetComponent<CarController> ();
+
+			if (m_MaxSpeed < 1e-3) {
+				m_MaxSpeed = m_CarController.MaxSpeed;
+			}
 
             // give the random perlin a random value
             m_RandomPerlin = Random.value * 100;
@@ -114,8 +120,7 @@ namespace UnityStandardAssets.Vehicles.Car
                         float cautiousnessRequired = Mathf.InverseLerp (0, m_CautiousMaxAngle,
                                                              Mathf.Max (spinningAngle,
                                                                  approachingCornerAngle));
-                        desiredSpeed = Mathf.Lerp (m_CarController.MaxSpeed, m_CarController.MaxSpeed * m_CautiousSpeedFactor,
-                            cautiousnessRequired);
+                        desiredSpeed = Mathf.Lerp (m_MaxSpeed, m_MaxSpeed * m_CautiousSpeedFactor, cautiousnessRequired);
                         break;
                     }
 
@@ -194,7 +199,6 @@ namespace UnityStandardAssets.Vehicles.Car
                 }
             }
         }
-
 
         private void OnCollisionStay (Collision col)
         {
