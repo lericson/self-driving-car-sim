@@ -168,6 +168,7 @@ namespace UnityStandardAssets.Vehicles.Car
             if (Visualize)
             {
                 closestPointMarker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+				closestPointMarker.layer = 5;  // UI Layer
                 closestPointMarker.transform.localScale = new Vector3(1f, 1f, 1f);
                 closestPointMarker.GetComponent<Renderer>().material.color = Color.red;
                 closestPointMarker.GetComponent<Collider>().enabled = false;
