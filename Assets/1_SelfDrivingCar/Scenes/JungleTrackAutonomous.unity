@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 8
+  serializedVersion: 7
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -25,7 +25,6 @@ RenderSettings:
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 0
-  m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
@@ -42,7 +41,7 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 7
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -54,7 +53,7 @@ LightmapSettings:
     m_EnableBakedLightmaps: 1
     m_EnableRealtimeLightmaps: 1
   m_LightmapEditorSettings:
-    serializedVersion: 8
+    serializedVersion: 4
     m_Resolution: 2
     m_BakeResolution: 40
     m_TextureWidth: 1024
@@ -67,28 +66,14 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
+    m_DirectLightInLightProbes: 1
     m_FinalGather: 0
     m_FinalGatherFiltering: 1
     m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
-    m_MixedBakeMode: 1
-    m_BakeBackend: 0
-    m_PVRSampling: 1
-    m_PVRDirectSampleCount: 32
-    m_PVRSampleCount: 500
-    m_PVRBounces: 2
-    m_PVRFiltering: 0
-    m_PVRFilteringMode: 1
-    m_PVRCulling: 1
-    m_PVRFilteringGaussRadiusDirect: 1
-    m_PVRFilteringGaussRadiusIndirect: 5
-    m_PVRFilteringGaussRadiusAO: 2
-    m_PVRFilteringAtrousColorSigma: 1
-    m_PVRFilteringAtrousNormalSigma: 1
-    m_PVRFilteringAtrousPositionSigma: 1
   m_LightingDataAsset: {fileID: 112000001, guid: f2e0ce9f5ba666e4fa68b84ff85c4590,
     type: 2}
-  m_ShadowMaskMode: 2
+  m_RuntimeCPUUsage: 25
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -105,8 +90,6 @@ NavMeshSettings:
     minRegionArea: 2
     manualCellSize: 0
     cellSize: 0.16666667
-    manualTileSize: 0
-    tileSize: 256
     accuratePlacement: 0
   m_NavMeshData: {fileID: 0}
 --- !u!1001 &1461843
@@ -5527,7 +5510,7 @@ Light:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1012837296}
   m_Enabled: 1
-  serializedVersion: 8
+  serializedVersion: 7
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
@@ -5552,8 +5535,6 @@ Light:
   m_Lightmapping: 4
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
-  m_ColorTemperature: 6570
-  m_UseColorTemperature: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
 --- !u!4 &1012837298
@@ -9670,14 +9651,6 @@ Prefab:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 11400002, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
-      propertyPath: m_SpeedType
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11400002, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
-      propertyPath: m_Topspeed
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 11400002, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
       propertyPath: Visualize
       value: 1
       objectReference: {fileID: 0}
@@ -12230,6 +12203,138 @@ MonoBehaviour:
   - {x: 197.19827, y: -78.932076, z: 19.161018}
   - {x: 194.30827, y: -78.432076, z: 33.751022}
   - {x: 181.81827, y: -75.072075, z: 44.86102}
+  distances:
+  - 0
+  - 11.873229
+  - 22.406746
+  - 31.870937
+  - 39.86001
+  - 48.132725
+  - 60.199303
+  - 79.03646
+  - 90.49897
+  - 100.458336
+  - 110.56979
+  - 123.990776
+  - 131.35622
+  - 141.40428
+  - 155.7993
+  - 166.35654
+  - 182.78242
+  - 198.06758
+  - 206.74416
+  - 220.05852
+  - 229.8499
+  - 239.95244
+  - 247.8674
+  - 259.69757
+  - 272.3559
+  - 281.6864
+  - 290.52737
+  - 298.70157
+  - 303.506
+  - 314.80643
+  - 323.1635
+  - 336.49072
+  - 346.22913
+  - 360.2211
+  - 375.1254
+  - 391.2171
+  - 396.29138
+  - 405.79852
+  - 415.26987
+  - 430.86295
+  - 441.08444
+  - 449.7376
+  - 461.4743
+  - 470.8051
+  - 476.58878
+  - 488.568
+  - 502.6129
+  - 510.48956
+  - 524.57983
+  - 530.37195
+  - 535.3897
+  - 542.29895
+  - 550.60345
+  - 560.80066
+  - 573.1937
+  - 584.91064
+  - 595.2405
+  - 605.131
+  - 614.80994
+  - 626.6097
+  - 633.7406
+  - 641.79224
+  - 649.6191
+  - 658.6448
+  - 668.8236
+  - 678.68774
+  - 693.3982
+  - 706.5304
+  - 720.37946
+  - 737.7355
+  - 755.3702
+  - 784.7903
+  - 802.5834
+  - 816.6616
+  - 829.26953
+  - 841.73346
+  - 856.83636
+  - 865.9084
+  - 880.0617
+  - 894.9901
+  - 903.48254
+  - 913.765
+  - 922.666
+  - 931.1204
+  - 939.1775
+  - 950.2015
+  - 959.9039
+  - 969.47424
+  - 982.6029
+  - 993.9523
+  - 1002.1076
+  - 1021.88794
+  - 1039.2482
+  - 1053.1792
+  - 1059.4283
+  - 1071.4335
+  - 1078.2179
+  - 1091.4707
+  - 1100.3783
+  - 1107.7705
+  - 1114.3427
+  - 1122.8741
+  - 1139.829
+  - 1153.0607
+  - 1170.7817
+  - 1189.424
+  - 1206.564
+  - 1220.7306
+  - 1242.4227
+  - 1267.3228
+  - 1278.2032
+  - 1283.986
+  - 1293.2584
+  - 1299.871
+  - 1308.3096
+  - 1317.2631
+  - 1325.019
+  - 1340.2394
+  - 1361.9396
+  - 1368.8824
+  - 1379.3079
+  - 1385.6798
+  - 1391.7504
+  - 1400.8895
+  - 1412.5294
+  - 1423.4434
+  - 1429.9032
+  - 1442.062
+  - 1456.0576
+  - 1470.9395
+  - 1487.99
   editorVisualisationSubsteps: 10000
 --- !u!4 &2079207927
 Transform:

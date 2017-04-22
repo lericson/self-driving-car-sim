@@ -2118,15 +2118,19 @@ MonoBehaviour:
   m_MaxHandbrakeTorque: 100000000
   m_Downforce: 100
   m_SpeedType: 0
-  m_Topspeed: 30
+  m_Topspeed: 200
   m_RevRangeBoundary: 1
   m_SlipLimit: 0.4
   m_BrakeTorque: 20000
   CenterCamera: {fileID: 20000011327949428}
   LeftCamera: {fileID: 20000011124301124}
   RightCamera: {fileID: 20000013690046254}
+  AutoRecord: 0
+  SaveInterval: 1000
   RoadWaypointCircuit: {fileID: 0}
+  RandomStartPos: 0
   Visualize: 0
+  SaveLocation: 
 --- !u!146 &14600000
 WheelCollider:
   m_ObjectHideFlags: 1

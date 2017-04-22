@@ -103,9 +103,14 @@ namespace UnityStandardAssets.Vehicles.Car
 					Debug.Log("Starting to record");
 					carSamples = new Queue<CarSample>();
 					StartCoroutine(Sample());             
-                } 
+                }
 				else
-                {
+				{
+					if (CurrentSpeed < 5f)
+					{ 
+						Debug.LogWarning ("Not saving shit recording, clearing samples");
+						carSamples.Clear ();
+					}
                     Debug.Log("Stopping record");
                     StopCoroutine(Sample());
                     Debug.Log("Writing to disk");
@@ -174,18 +179,29 @@ namespace UnityStandardAssets.Vehicles.Car
                 closestPointMarker.GetComponent<Collider>().enabled = false;
             }
 
-            if (RoadWaypointCircuit != null && RandomStartPos)
-            {
-                RoadWaypointCircuit.putAtRandomPoint(transform);
+			if (RoadWaypointCircuit != null && RandomStartPos)
+			{
+				RandomSpawn ();
+			}
 
-            }
-            if (AutoRecord)
+			if (AutoRecord)
             {
 				OpenFolder (SaveLocation);
                 IsRecording = true;
             }
-
         }
+
+		private void RandomSpawn()
+		{
+			RoadWaypointCircuit.putAtRandomPoint(transform);
+			transform.position += (new Vector3 ((UnityEngine.Random.value - 0.5f), 0f, (UnityEngine.Random.value - 0.5f))) * 14f;
+			m_Rigidbody.velocity = 20f/3.6f * UnityEngine.Random.value * transform.forward;
+			m_Rigidbody.angularVelocity = new Vector3 (0f, 2f*UnityEngine.Random.value - 1f, 0f);
+			var tr = (new GameObject()).transform;
+			tr.position = transform.position;
+			tr.rotation = transform.rotation;
+			GetComponent<WaypointProgressTracker> ().target = tr;
+		}
 
         private void GearChanging ()
         {
@@ -515,7 +531,7 @@ namespace UnityStandardAssets.Vehicles.Car
 			}
 			if (carSamples.Count > 0) {
 				//request if there are more samples to pull
-				StartCoroutine(WriteSamplesToDisk()); 
+				StartCoroutine(WriteSamplesToDisk());
 			}
 			else 
 			{
@@ -528,10 +544,12 @@ namespace UnityStandardAssets.Vehicles.Car
 				transform.rotation = saved_rotation;
 				m_Rigidbody.velocity = new Vector3(0f,-10f,0f);
 				Move(0f, 0f, 0f, 0f);
-                if (AutoRecord)
-                {
-                    IsRecording = true;
-                }
+				if (AutoRecord) {
+					IsRecording = true;
+				}
+				if (RandomStartPos) {
+					RandomSpawn ();
+				}
 			}
 		}
 

@@ -43,7 +43,19 @@ namespace UnityStandardAssets.Utility
         public WaypointCircuit.RoutePoint speedPoint { get; private set; }
         public WaypointCircuit.RoutePoint progressPoint { get; private set; }
 
-        public Transform target;
+		public Transform target{
+			get {
+				return m_target;
+			}
+			set {
+				m_target = value;
+				GetComponent<CarAIControl>().SetTarget(target);
+				progressNum = circuit.GetClosestWaypointIndex (target.position);
+				progressDistance = circuit.distances [progressNum];
+				progressPoint = circuit.GetRoutePoint (progressDistance);
+			}
+		}
+		private Transform m_target;
 
         private float progressDistance; // The progress round the route, used in smooth mode.
         private int progressNum; // the current waypoint number, used in point-to-point mode.
@@ -66,7 +78,6 @@ namespace UnityStandardAssets.Utility
             GetComponent<CarAIControl>().SetTarget(target);
             Reset();
         }
-
 
         // reset the object to sensible values
         public void Reset()

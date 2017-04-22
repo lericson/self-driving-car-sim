@@ -183,7 +183,7 @@ namespace UnityStandardAssets.Utility
             return closestI;
         }
 
-        public void putAtRandomPoint(Transform pos)
+		public Transform putAtRandomPoint(Transform pos)
         {
             int p0Idx = rnd.Next(numPoints);
             Debug.Log(string.Format("p0Idx = {0}", p0Idx));
@@ -192,7 +192,7 @@ namespace UnityStandardAssets.Utility
             int p2Idx = (p0Idx + 2 + numPoints) % numPoints;
             int p3Idx = (p0Idx + 3 + numPoints) % numPoints;
             var spline = new CatmulRomSpline(points[p0Idx], points[p1Idx], points[p2Idx],points[p3Idx]);
-            float t = (float)rnd.NextDouble();
+			float t = (float)rnd.NextDouble ();
             Debug.Log(string.Format("t = {0}",t));
             Vector3 x = spline.getPointAtT(t);
             Vector3 x_ = spline.getPointAtT(t + 1e-2f);
@@ -202,10 +202,8 @@ namespace UnityStandardAssets.Utility
             //pos.rotation.SetFromToRotation(newHeadding, initialHeadding);
             pos.position = x;
             pos.rotation = Quaternion.LookRotation(newHeadding);
+			return Waypoints [p2Idx].transform;
         }
-
-
-
 
         private void CachePositionsAndDistances()
         {

@@ -467,10 +467,6 @@ Prefab:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11400002, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
-      propertyPath: m_SpeedType
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11400002, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
       propertyPath: m_WaypointCircuit
       value: 
       objectReference: {fileID: 0}
@@ -481,6 +477,10 @@ Prefab:
     - target: {fileID: 11400002, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
       propertyPath: Visualize
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400002, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
+      propertyPath: RandomStartPos
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 0e7ee4df08df88c4880f43398f9ad2c2, type: 2}
@@ -5823,6 +5823,36 @@ MonoBehaviour:
   - {x: 156.80827, y: 2.9029226, z: 60.27102}
   - {x: 176.10828, y: 2.9029226, z: 79.57102}
   - {x: 179.30827, y: 2.9029226, z: 98.67102}
+  distances:
+  - 0
+  - 20.248457
+  - 50.502213
+  - 72.649445
+  - 93.8053
+  - 112.094086
+  - 136.3133
+  - 165.22437
+  - 193.82437
+  - 222.58301
+  - 262.17416
+  - 306.84003
+  - 369.9179
+  - 432.61325
+  - 489.98645
+  - 532.10175
+  - 567.36365
+  - 607.86414
+  - 675.9711
+  - 763.58984
+  - 825.92377
+  - 856.33234
+  - 896.3573
+  - 959.4892
+  - 983.1757
+  - 1008.6649
+  - 1084.5745
+  - 1111.8688
+  - 1131.235
   editorVisualisationSubsteps: 10000
 --- !u!4 &896562762
 Transform:
