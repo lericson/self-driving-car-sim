@@ -63,10 +63,15 @@ public class CommandServer : MonoBehaviour
 			}
 			else {
 				// Collect Data from the Car
+				float distanceToMiddle, speedInRoadHeading;
+				_carController.getRelativeToRoadCenter(out distanceToMiddle, out speedInRoadHeading);
 				Dictionary<string, string> data = new Dictionary<string, string>();
 				data["steering_angle"] = _carController.CurrentSteerAngle.ToString("N4");
 				data["throttle"] = _carController.AccelInput.ToString("N4");
 				data["speed"] = _carController.CurrentSpeed.ToString("N4");
+				data["num_wheels_on_road"] = _carController.NumWheelsOnRoad.ToString("N4");
+				data["distance_to_middle"] = distanceToMiddle.ToString("N4");
+				data["speed_in_road_heading"] = speedInRoadHeading.ToString("N4");
 				data["image"] = Convert.ToBase64String(CameraHelper.CaptureFrame(FrontFacingCamera));
 				_socket.Emit("telemetry", new JSONObject(data));
 			}
