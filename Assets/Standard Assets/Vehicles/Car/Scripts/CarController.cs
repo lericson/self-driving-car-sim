@@ -197,10 +197,13 @@ namespace UnityStandardAssets.Vehicles.Car
 			transform.position += (new Vector3 ((UnityEngine.Random.value - 0.5f), 0f, (UnityEngine.Random.value - 0.5f))) * 14f;
 			m_Rigidbody.velocity = 20f/3.6f * UnityEngine.Random.value * transform.forward;
 			m_Rigidbody.angularVelocity = new Vector3 (0f, 2f*UnityEngine.Random.value - 1f, 0f);
-			var tr = (new GameObject()).transform;
-			tr.position = transform.position;
-			tr.rotation = transform.rotation;
-			GetComponent<WaypointProgressTracker> ().target = tr;
+			var progressTracker = GetComponent<WaypointProgressTracker> ();
+			if (progressTracker != null) {
+				var tr = (new GameObject ()).transform;
+				tr.position = transform.position;
+				tr.rotation = transform.rotation;
+				progressTracker.target = tr;
+			}
 		}
 
         private void GearChanging ()
